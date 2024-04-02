@@ -2,7 +2,7 @@
 from .query import process_query
 from .llm import generate_code_versions, generate_code_version
 from .merger import select_optimal_code
-from .checker import check_code
+from .compiler import check_code
 from .deployer import deploy_code, test_deployed_contract
 from .environment_setup import setup_environment
 
