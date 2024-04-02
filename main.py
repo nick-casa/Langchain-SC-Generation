@@ -18,13 +18,20 @@ def parse_arguments():
     parser.add_argument(
         "-p", "--prompt", type=str, help="The prompt for generating code", required=True
     )
+
+    # Add more arguments as needed
+    # parser.add_argument("-o", "--output", type=str, help="The output file path")
+    # parser.add_argument("-t", "--temperature", type=float, help="The temperature for code generation")
+    # parser.add_argument("-n", "--num_versions", type=int, help="The number of code versions to generate")
+    # parser.add_argument("-m", "--max_retries", type=int, help="The maximum number of retries for code generation")
     return parser.parse_args()
 
 
 def main() -> None:
     """
-    Main function that orchestrates the query processing, code generation, merging, checking, and deployment.
-    Accepts a prompt via a command-line argument.
+    Main function that orchestrates the query processing,
+    code generation, merging, checking, and deployment.
+    Accepts a prompt via a command-line argument via -p or --prompt flag.
     """
     args = parse_arguments()
     prompt = args.prompt
@@ -38,30 +45,31 @@ def main() -> None:
         print(f"Attempt {attempt_count} of {max_retries}")
 
         processed_query = process_query(prompt)
-        # generated_codes = generate_code_versions(processed_query) # This function generates multiple versions of code
-        generated_code = generate_code_version(
-            processed_query, feedback=feedback
-        )  # For now, let's confine this to only one
-        # optimal_code = select_optimal_code(generated_codes) # Accordingly, we won't need this for now
-        check_results = check_code(
-            generated_code
-        )  # Check that the generated code can compile
-        feedback["check_results"] = check_results  # Add check results to feedback
+        # This function generates multiple versions of code
+        # generated_codes = generate_code_versions(processed_query)
+        # For now, let's confine this to only one
+        generated_code = generate_code_version(processed_query, feedback=feedback)
+        # Accordingly, we won't need this for now
+        # optimal_code = select_optimal_code(generated_codes)
+        # Check that the generated code can compile
+        check_results = check_code(generated_code)
+        # Add check results to feedback
+        feedback["check_results"] = check_results
 
         if check_results["status"] == "Success":
             print("Generated code can compile!")
             setup_environment()
             deploy_results = deploy_code(generated_code)
-            feedback["deploy_results"] = (
-                deploy_results  # Add deployment results to feedback
-            )
+            # Add deployment results to feedback
+            feedback["deploy_results"] = deploy_results
 
             if deploy_results["status"] == "Success":
                 print("Generated code deployed successfully!")
                 test_results = test_deployed_contract(
                     deploy_results["contract_address"]
                 )
-                feedback["test_results"] = test_results  # Add test results to feedback
+                # Add test results to feedback
+                feedback["test_results"] = test_results
 
                 if test_results["status"] == "Pass":
                     print("Deployed contract tests passed:", test_results)
