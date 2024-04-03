@@ -4,7 +4,6 @@ from .llm import generate_initial_code_version, generate_code_version_with_feedb
 from .merger import select_optimal_code
 from .compiler import check_code
 from .deployer import deploy_code, test_deployed_contract
-from .environment_setup import setup_environment
 
 __all__ = [
     "process_query",
@@ -13,5 +12,4 @@ __all__ = [
     "select_optimal_code",
     "check_code",
     "deploy_code",
-    "setup_environment",
 ]

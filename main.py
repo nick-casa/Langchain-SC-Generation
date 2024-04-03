@@ -8,7 +8,6 @@ from agents import (
     check_code,
     deploy_code,
     test_deployed_contract,
-    setup_environment,
 )
 
 
@@ -63,7 +62,6 @@ def main() -> None:
 
         if check_results["status"] == "Success":
             print("Generated code can compile!")
-            setup_environment()
             deploy_results = deploy_code(generated_code)
             # Add deployment results to feedback
             feedback["deploy_results"] = deploy_results
