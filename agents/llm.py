@@ -38,15 +38,15 @@ class SmartContractGenerator:
             f"\033[94m************** LLM Smart Contract Generator Successfully Initialized ************** \033[0m"
         )
 
-    def generate_code_version(
-        self, processed_prompt: str, feedback: Dict[str, Union[str, List[str]]] = None
-    ) -> str:
+    def generate_initial_code_version(self, processed_prompt: str) -> str:
         """
-        Generates a version of code from the processed query, optionally using feedback from previous attempts.
+        Generates the initial version of code based on the given processed query.
 
-        :param processed_prompt: The user processed query string.
-        :param feedback: A dictionary containing feedback from previous code checks, deployments, or tests.
-        :return: Generated code as a string.
+        Args:
+            processed_prompt (str): The processed query string intended for code generation.
+
+        Returns:
+            str: The initially generated code as a string.
         """
         messages = [
             SystemMessage(content=processed_prompt),
@@ -54,6 +54,67 @@ class SmartContractGenerator:
         # Implement logic to modify code generation based on feedback
         print(
             f"\033[94m************** Generating Smart Contract With LLM ************** \033[0m"
+        )
+        response = self.llm(messages).content
+        return response
+
+    def generate_code_version_with_feedback(
+        self,
+        processed_prompt: str,
+        output_code: str,
+        feedback: Dict[str, Union[str, List[str]]] = None,
+    ) -> str:
+        """
+        Enhances the code generation process by utilizing feedback from previous attempts to generate a refined version of code.
+
+        Args:
+            processed_prompt (str): The processed query string for which the code is generated.
+            output_code (str): The output code from the previous code generation attempt.
+            feedback (Dict[str, Union[str, List[str]]], optional): Feedback provided from previous checks, deployments, or tests, structured as a dictionary. This feedback includes keys such as 'check_results', 'deploy_results', and 'test_results', each possibly containing a sub-dictionary with an 'errors' key that maps to a string or list of strings detailing specific issues.
+
+        Returns:
+            str: The newly generated code as a string, taking into account the provided feedback.
+        """
+        messages = [
+            SystemMessage(content=processed_prompt),
+            HumanMessage(
+                content="Here is the code generated from the previous attempt:"
+            ),
+            HumanMessage(content=output_code),
+        ]
+
+        if feedback["check_results"]:
+            messages.append(
+                HumanMessage(
+                    content="The generated code failed to compile. Here is the associated error(s):"
+                )
+            )
+            messages.append(HumanMessage(content=feedback["check_results"]["errors"]))
+
+        if feedback["deploy_results"]:
+            messages.append(
+                HumanMessage(
+                    content="The generated code failed to deploy. Here is the associated error(s):"
+                )
+            )
+            messages.append(HumanMessage(content=feedback["deploy_results"]["errors"]))
+
+        if feedback["test_results"]:
+            messages.append(
+                HumanMessage(
+                    content="The deployed contract failed the security tests. Here is the associated error(s):"
+                )
+            )
+            messages.append(HumanMessage(content=feedback["test_results"]["errors"]))
+
+        messages.append(
+            SystemMessage(
+                content="Utilize the feedback to enhance the code. Pay attention to the errors and warnings. Output only the code."
+            )
+        )
+        # Implement logic to modify code generation based on feedback
+        print(
+            f"\033[94m************** Generating Smart Contract (With Feedback) With LLM ************** \033[0m"
         )
         response = self.llm(messages).content
         return response

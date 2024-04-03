@@ -2,8 +2,8 @@ import argparse
 from typing import List, Dict, Union
 from agents import (
     process_query,
-    generate_code_versions,
-    generate_code_version,
+    generate_code_version_with_feedback,
+    generate_initial_code_version,
     select_optimal_code,
     check_code,
     deploy_code,
@@ -48,7 +48,12 @@ def main() -> None:
         # This function generates multiple versions of code
         # generated_codes = generate_code_versions(processed_query)
         # For now, let's confine this to only one
-        generated_code = generate_code_version(processed_query, feedback=feedback)
+        if generated_code:
+            generated_code = generate_code_version_with_feedback(
+                processed_query, generated_code, feedback=feedback
+            )
+        else:
+            generated_code = generate_initial_code_version(processed_query)
         # Accordingly, we won't need this for now
         # optimal_code = select_optimal_code(generated_codes)
         # Check that the generated code can compile
