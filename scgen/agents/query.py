@@ -18,5 +18,5 @@ def process_query(input_query: str) -> str:
         prompt = file.read()
 
     # Replace {user_query} with input_query in prompt
-    processed_query = prompt.replace("{user_query}", input_query)
+    processed_query = prompt.replace("{user_prompt}", input_query)
     return processed_query
