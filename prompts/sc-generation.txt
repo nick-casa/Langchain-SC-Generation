@@ -1,0 +1,16 @@
+Generate a Solidity smart contract according to the following user-defined specifications:
+
+{user_prompt}
+
+In addition, ensure the following conditions are met:
+- The smart contract should have a clear designation of ownership and administrative controls.
+- Include the ability to define and execute a customizable set of actions, which can be specified by the user.
+- Ensure that the contract contains mechanisms for the creation, modification, and removal of features or roles, as specified by the user's criteria.
+- The contract must adhere to current security protocols and best practices to avoid common vulnerabilities.
+- Provide a modular design that allows for individual components of the contract to be upgraded or replaced over time without redeploying the entire contract.
+- Write comprehensive in-line documentation that explains the purpose and mechanics of each function and section within the code.
+- Structure the code for readability and maintainability, using a clear and logical organization that aligns with the latest Solidity development standards.
+
+Please ensure that the code is versatile and can be adapted to any set of rules or conditions the user might provide, with placeholders where specific user details can be inserted.
+
+Finally, only return the code, do not add any additional text either before or after the code in your response.
