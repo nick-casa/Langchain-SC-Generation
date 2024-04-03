@@ -14,6 +14,8 @@ class SmartContractGenerator:
         temperature: float = 0.5,
         request_timout: int = 120,
     ):
+        if not azure_config and not os.environ["OPENAI_API_KEY"]:
+            raise ValueError("Azure Config or OpenAI API key are missing.")
 
         if azure_config:
             self.llm = AzureChatOpenAI(
@@ -32,6 +34,9 @@ class SmartContractGenerator:
                 temperature=temperature,
                 request_timeout=request_timout,
             )
+        print(
+            f"\033[94m************** LLM Smart Contract Generator Successfully Initialized ************** \033[0m"
+        )
 
     def generate_code_version(
         self, processed_prompt: str, feedback: Dict[str, Union[str, List[str]]] = None
@@ -47,18 +52,11 @@ class SmartContractGenerator:
             SystemMessage(content=processed_prompt),
         ]
         # Implement logic to modify code generation based on feedback
+        print(
+            f"\033[94m************** Generating Smart Contract With LLM ************** \033[0m"
+        )
         response = self.llm(messages).content
         return response
-
-    # TODO: Implement the following methods in the SmartContractGenerator class:
-    # def generate_code_versions(prompt: str) -> List[str]:
-    #     """
-    #     Generates multiple versions of code from a given prompt.
-
-    #     :param prompt: A string prompt to feed into the language model.
-    #     :return: A list of generated code versions.
-    #     """
-    #     pass
 
 
 if __name__ == "__main__":
@@ -78,4 +76,5 @@ if __name__ == "__main__":
     processed_prompt = process_query(user_prompt)
 
     generator = SmartContractGenerator(azure_config=None)
-    generator.generate_code_version(processed_prompt)
+    generated_code = generator.generate_code_version(processed_prompt)
+    print(generated_code)
