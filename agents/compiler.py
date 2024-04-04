@@ -1,60 +1,45 @@
-from typing import List, Dict, Union
 import subprocess
 import tempfile
 import os
 import json
 import re
 
-# install slither if needed:
-# pip install slither-analyzer
-
 def get_solidity_version(code: str) -> str:
-    """
-    Extracts the Solidity version from the pragma statement in the code.
-    """
     match = re.search(r'pragma solidity\s+([^;]+);', code)
     return match.group(1).strip() if match else None
 
-def run_static_analyses(contract_path: str) -> List[str]:
-    """
-    Runs Slither for static analysis on the Solidity contract.
-    
-    :param contract_path: Path to the Solidity contract file.
-    :return: List of strings describing detected issues.
-    """
-    errors = []
+def set_solc_version(version: str) -> bool:
     try:
-        # Running Slither analysis and directing output to a temporary JSON file
-        result = subprocess.run(['slither', contract_path, '--json', 'slither_output.json'],
+        subprocess.run(['solc-select', 'use', version], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        return True
+    except subprocess.CalledProcessError:
+        return False
+
+def run_static_analyses(contract_path: str, temp_dir: str) -> List[str]:
+    errors = []
+    slither_output_path = os.path.join(temp_dir, 'slither_output.json')
+    try:
+        result = subprocess.run(['slither', contract_path, '--json', slither_output_path],
                                 capture_output=True, text=True, check=False)
         
-        # Checking for Slither execution failure
         if result.returncode != 0:
-            # Slither execution failed; we return the stderr output as an error message
             return [f"Slither failed to execute: {result.stderr}"]
 
-        # Reading and parsing the Slither output JSON file
-        with open('slither_output.json', 'r') as file:
+        with open(slither_output_path, 'r') as file:
             slither_output = json.load(file)
-            
-        # Extracting information about detected issues
+        
         for detector in slither_output.get('detectors', []):
-            # Constructing a meaningful message for each detected issue
             issue_description = f"{detector.get('check', 'Unknown Check')}: {detector.get('description', 'No description provided.')}"
             errors.append(issue_description)
             
     except Exception as e:
         errors.append(f"Error running static analysis: {str(e)}")
-    
-    finally:
-        # Clean-up: remove the temporary Slither output file if it exists
-        if os.path.exists('slither_output.json'):
-            os.remove('slither_output.json')
 
     return errors
 
-def check_code(code: str, analysis_depth: str = "standard") -> Dict[str, Union[str, List[str]]]:
+def check_code(code: str, analysis_depth: str = "standard") -> Dict[str, Union[str, List[str], Dict]]:
     errors: List[str] = []
+    abi: Dict = {}
 
     solidity_version = get_solidity_version(code)
     if solidity_version is None:
@@ -72,7 +57,13 @@ def check_code(code: str, analysis_depth: str = "standard") -> Dict[str, Union[s
         compile_input = {
             'language': 'Solidity',
             'sources': {'Contract.sol': {'content': code}},
-            'settings': {'outputSelection': {'*': {'*': ['abi', 'metadata', 'evm.bytecode', 'evm.bytecode.sourceMap']}}}
+            'settings': {
+                'outputSelection': {
+                    '*': {
+                        '*': ['abi', 'metadata', 'evm.bytecode', 'evm.bytecode.sourceMap']
+                    }
+                }
+            }
         }
 
         try:
@@ -81,17 +72,28 @@ def check_code(code: str, analysis_depth: str = "standard") -> Dict[str, Union[s
 
             if 'errors' in compile_output:
                 for error in compile_output['errors']:
-                    if error.get('severity') in ['error', 'warning']:  # Customize based on severity needed
+                    if error.get('severity') in ['error', 'warning']:
                         errors.append(error.get('formattedMessage', 'Unknown compilation issue.'))
 
-            if not any('error' in e for e in errors):
-                analysis_errors = run_static_analyses(contract_path)
+            if compile_output.get('contracts'):
+                # Iterate over all contracts in the file
+                for contract_name, contract_data in compile_output['contracts']['Contract.sol'].items():
+                    if 'abi' in contract_data:
+                        abi[contract_name] = contract_data['abi']
+
+            if not errors or all('warning' in e for e in errors):
+                analysis_errors = run_static_analyses(contract_path, temp_dir)
                 errors.extend(analysis_errors)
 
         except subprocess.CalledProcessError as e:
             errors.append(f"Compilation process failed: {e.stderr}")
 
-    # Optionally reset solc to a default or previously used version after operation
-    # set_solc_version("default")  # Be cautious about changing global settings
+    result = {
+        "status": "Failure" if errors else "Success",
+        "errors": errors,
+    }
 
-    return {"status": "Failure" if errors else "Success", "errors": errors}
+    if abi:
+        result["abi"] = abi
+
+    return result
