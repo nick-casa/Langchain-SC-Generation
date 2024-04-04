@@ -53,28 +53,6 @@ def run_static_analyses(contract_path: str) -> List[str]:
 
     return errors
 
-def run_static_analyses(contract_path: str, temp_dir: str) -> List[str]:
-    """
-    Placeholder for static analysis function. This should run tools like Slither
-    and return a list of detected issues.
-    """
-    errors = []
-    # Example static analysis call to Slither (assuming it's installed and configured)
-    try:
-        analysis_result = subprocess.run(['slither', contract_path, '--json', os.path.join(temp_dir, 'slither_output.json')],
-                                         capture_output=True, text=True, check=False)
-        if analysis_result.returncode == 0:
-            with open(os.path.join(temp_dir, 'slither_output.json'), 'r') as slither_file:
-                slither_output = json.load(slither_file)
-                for issue in slither_output.get('detectors', []):
-                    errors.append(f"{issue.get('check', 'Unknown')} - {issue.get('description', 'No description')}")
-    except subprocess.CalledProcessError as e:
-        errors.append("Slither static analysis failed to execute.")
-    except json.JSONDecodeError:
-        errors.append("Failed to parse Slither output.")
-
-    return errors
-
 def check_code(code: str, analysis_depth: str = "standard") -> Dict[str, Union[str, List[str]]]:
     errors: List[str] = []
 
