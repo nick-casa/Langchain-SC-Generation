@@ -1,3 +1,8 @@
 langchain
 langchain-core
 langchain-openai
+slither-analyzer
+regex
+json
+tempfile
+subprocess
