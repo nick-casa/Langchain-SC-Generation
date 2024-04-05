@@ -1,6 +1,7 @@
 langchain
 langchain-core
 langchain-openai
+% for compiler.py
 slither-analyzer
 regex
 json
