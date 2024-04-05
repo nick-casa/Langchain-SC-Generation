@@ -6,3 +6,4 @@ regex
 json
 tempfile
 subprocess
+py-solc-x
