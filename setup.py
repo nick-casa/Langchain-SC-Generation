@@ -1,4 +1,5 @@
 from setuptools import setup, find_packages
+import subprocess
 
 
 def read_requirements():
@@ -12,3 +13,6 @@ setup(
     packages=find_packages(),
     install_requires=read_requirements(),
 )
+
+
+subprocess.run(["npm", "install", "-g", "solc"])

@@ -1,10 +1,7 @@
 langchain
 langchain-core
 langchain-openai
-% for compiler.py
 slither-analyzer
-regex
-json
-tempfile
-subprocess
 py-solc-x
+python-dotenv
+solc-select

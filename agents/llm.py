@@ -1,15 +1,16 @@
 from typing import List, Dict, Union
 from typing_extensions import Protocol
+import os
 
 # from langchain.llms.openai import AzureOpenAI, OpenAI
-from langchain.chat_models import AzureChatOpenAI, ChatOpenAI
+from langchain_community.chat_models import AzureChatOpenAI, ChatOpenAI
 from langchain.schema import HumanMessage, SystemMessage
 
 
 class SmartContractGenerator:
     def __init__(
         self,
-        azure_config: Dict[str, str] | None,
+        azure_config: Dict[str, str] = None,
         model_name: str = "gpt-3.5-turbo-0125",
         temperature: float = 0.5,
         request_timout: int = 120,
@@ -83,7 +84,7 @@ class SmartContractGenerator:
             HumanMessage(content=output_code),
         ]
 
-        if feedback["check_results"]:
+        if "check_results" in feedback and feedback["check_results"]:
             messages.append(
                 HumanMessage(
                     content="The generated code failed to compile. Here is the associated error(s):"
@@ -91,7 +92,7 @@ class SmartContractGenerator:
             )
             messages.append(HumanMessage(content=feedback["check_results"]["errors"]))
 
-        if feedback["deploy_results"]:
+        if "deploy_results" in feedback and feedback["deploy_results"]:
             messages.append(
                 HumanMessage(
                     content="The generated code failed to deploy. Here is the associated error(s):"
@@ -99,7 +100,7 @@ class SmartContractGenerator:
             )
             messages.append(HumanMessage(content=feedback["deploy_results"]["errors"]))
 
-        if feedback["test_results"]:
+        if "test_results" in feedback and feedback["test_results"]:
             messages.append(
                 HumanMessage(
                     content="The deployed contract failed the security tests. Here is the associated error(s):"

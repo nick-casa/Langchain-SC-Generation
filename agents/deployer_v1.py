@@ -3,6 +3,7 @@ import json
 from web3 import Web3, HTTPProvider
 from solcx import compile_standard, install_solc
 import compiler as c
+
 # deployer.py
 import os
 import requests
@@ -14,39 +15,38 @@ def deploy_contract(code: str) -> Dict[str, str]:
     errors: List[str] = []
 
     version = c.get_solidity_version(contract_source)
-    print('Solidity version:', version)
+    print("Solidity version:", version)
     c.set_solc_version(version)
 
     # Compile the Solidity contract
-    compiled_sol = compile_standard({
-        "language": "Solidity",
-        "sources": {
-            "Contract.sol": {
-                "content": contract_source
-            }
-        },
-        "settings": {
-            "outputSelection": {
-                "*": {
-                    "*": ["abi", "metadata", "evm.bytecode", "evm.sourceMap"]
+    compiled_sol = compile_standard(
+        {
+            "language": "Solidity",
+            "sources": {"Contract.sol": {"content": contract_source}},
+            "settings": {
+                "outputSelection": {
+                    "*": {"*": ["abi", "metadata", "evm.bytecode", "evm.sourceMap"]}
                 }
-            }
-        }
-    }, solc_version=version[1:])
+            },
+        },
+        solc_version=version[1:],
+    )
 
     # Get the contract interface
-    contract_id, contract_interface = compiled_sol['contracts']['Contract.sol'].popitem()
+    contract_id, contract_interface = compiled_sol["contracts"][
+        "Contract.sol"
+    ].popitem()
 
     # Get the bytecode and ABI
-    bytecode = contract_interface['evm']['bytecode']['object']
-    abi = contract_interface['abi']
+    bytecode = contract_interface["evm"]["bytecode"]["object"]
+    abi = contract_interface["abi"]
 
-    print('bytecode:', bytecode)
-    print('abi:', abi)
+    print("bytecode:", bytecode)
+    print("abi:", abi)
 
     try:
         # Connect to Ganache
-        w3 = Web3(Web3.HTTPProvider('http://127.0.0.1:8545'))
+        w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545"))
 
         # Create a contract instance
         contract = w3.eth.contract(abi=abi, bytecode=bytecode)
@@ -55,33 +55,40 @@ def deploy_contract(code: str) -> Dict[str, str]:
         account = w3.eth.accounts[0]
 
         # Check if the contract has a constructor
-        constructor_abi = next((abi for abi in contract_interface['abi'] if abi['type'] == 'constructor'), None)
+        constructor_abi = next(
+            (abi for abi in contract_interface["abi"] if abi["type"] == "constructor"),
+            None,
+        )
 
         if constructor_abi:
             # If the contract has a constructor, get the constructor parameters from the user
             constructor_args = []
-            for input_param in constructor_abi['inputs']:
-                param_type = input_param['type']
-                param_name = input_param['name']
+            for input_param in constructor_abi["inputs"]:
+                param_type = input_param["type"]
+                param_name = input_param["name"]
                 # param_value = input(f"Enter the value for {param_name} ({param_type}): ")
                 # could replace the hardcoded values below with prompts for param_values from the user, but as we are just
-                if param_type.startswith('uint') or param_type.startswith('int'):
+                if param_type.startswith("uint") or param_type.startswith("int"):
                     param_value = int(5)
-                elif param_type == 'bool':
-                    param_value = bool(True) # an arbitrary bool
-                elif param_type == 'address':
-                    param_value = account # a sample address that we know exist
+                elif param_type == "bool":
+                    param_value = bool(True)  # an arbitrary bool
+                elif param_type == "address":
+                    param_value = account  # a sample address that we know exist
                 else:
                     param_value = None
-                    errors.append(f"Contract's constructor required the type {param_type}, which is unsupported by our application's deployment testing.")
+                    errors.append(
+                        f"Contract's constructor required the type {param_type}, which is unsupported by our application's deployment testing."
+                    )
                 # Note that more conversions may be needed to automatically test
                 constructor_args.append(param_value)
 
             # Deploy the contract with constructor arguments
-            tx_hash = contract.constructor(*constructor_args).transact({'from': account})
+            tx_hash = contract.constructor(*constructor_args).transact(
+                {"from": account}
+            )
         else:
             # If the contract doesn't have a constructor, deploy without arguments
-            tx_hash = contract.constructor().transact({'from': account})
+            tx_hash = contract.constructor().transact({"from": account})
 
         # Wait for the transaction to be mined and get the transaction receipt
         tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
@@ -94,7 +101,9 @@ def deploy_contract(code: str) -> Dict[str, str]:
         # Return the deployed contract instance
         deployed_contract = w3.eth.contract(address=contract_address, abi=abi)
     except requests.exceptions.ConnectionError as e:
-        errors.append("Connection error. Make sure Ganache is running on port 8545. You can start Ganache using this command in terminal: ganache-cli")
+        errors.append(
+            "Connection error. Make sure Ganache is running on port 8545. You can start Ganache using this command in terminal: ganache-cli"
+        )
     except Exception as e:
         print(type(e))
         errors.append(str(e))
@@ -107,7 +116,9 @@ def deploy_contract(code: str) -> Dict[str, str]:
     return result
 
 
-def test_deployed_contract(contract_address: str, code: str) -> Union[Dict[str, str], None]:
+def test_deployed_contract(
+    contract_address: str, code: str
+) -> Union[Dict[str, str], None]:
     """
     Tests the deployed contract at the given address and returns the test results.
 
@@ -116,22 +127,24 @@ def test_deployed_contract(contract_address: str, code: str) -> Union[Dict[str, 
     """
 
     with tempfile.TemporaryDirectory() as temp_dir:
-        contract_path = os.path.join(temp_dir, 'Contract.sol')
-        with open(contract_path, 'w') as file:
+        contract_path = os.path.join(temp_dir, "Contract.sol")
+        with open(contract_path, "w") as file:
             file.write(code)
 
         try:
             errors = []
-            mythril_output_path = os.path.join(temp_dir, 'mythril_output.json')
+            mythril_output_path = os.path.join(temp_dir, "mythril_output.json")
 
-            w3 = Web3(Web3.HTTPProvider('http://127.0.0.1:8545'))
+            w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545"))
             if not w3.is_address(contract_address):
                 print(f"Invalid contract address: {contract_address}")
                 return None
 
             command = f"myth analyze {contract_path}"
-            result = subprocess.run(command, shell=True, check=True, capture_output=True, text=True)
-            print('completed testing subprocess')
+            result = subprocess.run(
+                command, shell=True, check=True, capture_output=True, text=True
+            )
+            print("completed testing subprocess")
             print(result)
 
             if result.returncode != 0:
@@ -148,7 +161,9 @@ def test_deployed_contract(contract_address: str, code: str) -> Union[Dict[str, 
             # return errors
 
         except requests.exceptions.ConnectionError as e:
-            print("Connection error. Make sure Ganache is running on port 8545. You can start Ganache using this command in terminal: ganache-cli")
+            print(
+                "Connection error. Make sure Ganache is running on port 8545. You can start Ganache using this command in terminal: ganache-cli"
+            )
             return None
         except subprocess.CalledProcessError as e:
             print(f"Test deployed contract process failed:: {e.stderr}")
@@ -156,10 +171,6 @@ def test_deployed_contract(contract_address: str, code: str) -> Union[Dict[str, 
         except Exception as e:
             print(type(e))
             return None
-
-
-
-
 
 
 if __name__ == "__main__":
@@ -178,7 +189,7 @@ if __name__ == "__main__":
     # print(wallet_address, '\n', private_key)
 
     # sample solidity contract source code
-    contract_source = '''
+    contract_source = """
     pragma solidity ^0.8.0;
 
     contract MyContract {
@@ -192,9 +203,9 @@ if __name__ == "__main__":
             myVariable = _newValue;
         }
     }
-    '''
+    """
 
-    exception_contract = '''
+    exception_contract = """
     pragma solidity ^0.8.0;
     contract Exceptions {
 
@@ -237,8 +248,8 @@ if __name__ == "__main__":
     }
 
 }
-    '''
+    """
     result = deploy_contract(contract_source)
-    code_address = '0x15e7d5275370E2963246065E740C1485Fb258cE3'
+    code_address = "0x15e7d5275370E2963246065E740C1485Fb258cE3"
     test_result = test_deployed_contract(code_address, contract_source)
     print(test_result)

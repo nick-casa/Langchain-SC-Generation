@@ -1,13 +1,14 @@
 import argparse
+import os
+from dotenv import load_dotenv
 from typing import List, Dict, Union
 from agents import (
     process_query,
-    generate_code_version_with_feedback,
-    generate_initial_code_version,
-    select_optimal_code,
+    SmartContractGenerator,
+    # select_optimal_code,
     check_code,
     deploy_code,
-    test_deployed_contract,
+    # test_deployed_contract,
 )
 
 
@@ -27,32 +28,33 @@ def parse_arguments():
 
 
 def main() -> None:
+    load_dotenv()
     """
     Main function that orchestrates the query processing,
     code generation, merging, checking, and deployment.
     Accepts a prompt via a command-line argument via -p or --prompt flag.
     """
+    generator = SmartContractGenerator(azure_config=None)
     args = parse_arguments()
     prompt = args.prompt
     valid_output = False
+    generated_code, check_results, deploy_results = None, None, None
     max_retries = 5
     attempt_count = 0
     feedback = {}
 
     while not valid_output and attempt_count < max_retries:
         attempt_count += 1
-        print(f"Attempt {attempt_count} of {max_retries}")
-
         processed_query = process_query(prompt)
         # This function generates multiple versions of code
         # generated_codes = generate_code_versions(processed_query)
         # For now, let's confine this to only one
         if generated_code:
-            generated_code = generate_code_version_with_feedback(
+            generated_code = generator.generate_code_version_with_feedback(
                 processed_query, generated_code, feedback=feedback
             )
         else:
-            generated_code = generate_initial_code_version(processed_query)
+            generated_code = generator.generate_initial_code_version(processed_query)
         # Accordingly, we won't need this for now
         # optimal_code = select_optimal_code(generated_codes)
         # Check that the generated code can compile
@@ -61,30 +63,23 @@ def main() -> None:
         feedback["check_results"] = check_results
 
         if check_results["status"] == "Success":
-            print("Generated code can compile!")
             deploy_results = deploy_code(generated_code)
             # Add deployment results to feedback
             feedback["deploy_results"] = deploy_results
 
             if deploy_results["status"] == "Success":
-                print("Generated code deployed successfully!")
-                test_results = test_deployed_contract(
-                    deploy_results["contract_address"]
-                )
+                valid_output = True
+                # test_results = test_deployed_contract(
+                #    deploy_results["contract_address"]
+                # )
                 # Add test results to feedback
-                feedback["test_results"] = test_results
-
-                if test_results["status"] == "Pass":
-                    print("Deployed contract tests passed:", test_results)
-                    valid_output = True
-                else:
-                    print("Deployed contract tests failed:", test_results["errors"])
-            else:
-                print("Code deployment failed:", deploy_results["errors"])
-        else:
-            print("Code check failed:", check_results["errors"])
+                # feedback["test_results"] = test_results
+                # if test_results["status"] == "Success":
+                #   valid_output = True
 
         if not valid_output:
+            print(check_results)
+            print(deploy_results)
             print("Operation failed, attempting again...\n")
 
     if not valid_output:

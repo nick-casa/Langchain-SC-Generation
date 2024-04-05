@@ -1,1 +1,6 @@
 .env
+__pycache__/
+lib/
+dist/
+build/
+*.egg-info/
