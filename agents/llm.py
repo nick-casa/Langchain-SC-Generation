@@ -1,6 +1,8 @@
 from typing import List, Dict, Union
 from typing_extensions import Protocol
 import os
+import pprint
+from io import StringIO
 
 # from langchain.llms.openai import AzureOpenAI, OpenAI
 from langchain_community.chat_models import AzureChatOpenAI, ChatOpenAI
@@ -54,9 +56,11 @@ class SmartContractGenerator:
         ]
         # Implement logic to modify code generation based on feedback
         print(
-            f"\033[94m************** Generating Smart Contract With LLM ************** \033[0m"
+            f"\033[94m************** Generating Smart Contract With LLM **************"
         )
         response = self.llm(messages).content
+        pprint.pprint(response)
+        print("\033[0m")
         return response
 
     def generate_code_version_with_feedback(
@@ -90,7 +94,9 @@ class SmartContractGenerator:
                     content="The generated code failed to compile. Here is the associated error(s):"
                 )
             )
-            messages.append(HumanMessage(content=feedback["check_results"]["errors"]))
+            messages.append(
+                HumanMessage(content=str(feedback["check_results"]["errors"]))
+            )
 
         if "deploy_results" in feedback and feedback["deploy_results"]:
             messages.append(
@@ -98,7 +104,9 @@ class SmartContractGenerator:
                     content="The generated code failed to deploy. Here is the associated error(s):"
                 )
             )
-            messages.append(HumanMessage(content=feedback["deploy_results"]["errors"]))
+            messages.append(
+                HumanMessage(content=str(feedback["deploy_results"]["errors"]))
+            )
 
         if "test_results" in feedback and feedback["test_results"]:
             messages.append(
@@ -106,7 +114,9 @@ class SmartContractGenerator:
                     content="The deployed contract failed the security tests. Here is the associated error(s):"
                 )
             )
-            messages.append(HumanMessage(content=feedback["test_results"]["errors"]))
+            messages.append(
+                HumanMessage(content=str(feedback["test_results"]["errors"]))
+            )
 
         messages.append(
             SystemMessage(
@@ -115,9 +125,11 @@ class SmartContractGenerator:
         )
         # Implement logic to modify code generation based on feedback
         print(
-            f"\033[94m************** Generating Smart Contract (With Feedback) With LLM ************** \033[0m"
+            f"\033[94m************** Generating Smart Contract (With Feedback) With LLM **************"
         )
         response = self.llm(messages).content
+        pprint.pprint(response)
+        print("\033[0m")
         return response
 
 

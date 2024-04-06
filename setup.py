@@ -14,5 +14,4 @@ setup(
     install_requires=read_requirements(),
 )
 
-
-subprocess.run(["npm", "install", "-g", "solc"])
+# subprocess.run(["npm", "install", "-g", "solc"])

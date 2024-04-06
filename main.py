@@ -28,6 +28,10 @@ def parse_arguments():
 
 
 def main() -> None:
+    import warnings
+
+    warnings.filterwarnings("ignore")
+
     load_dotenv()
     """
     Main function that orchestrates the query processing,
@@ -77,10 +81,10 @@ def main() -> None:
                 # if test_results["status"] == "Success":
                 #   valid_output = True
 
-        if not valid_output:
-            print(check_results)
-            print(deploy_results)
-            print("Operation failed, attempting again...\n")
+        # if not valid_output:
+        # print(check_results)
+        # print(deploy_results)
+        # print("Operation failed, attempting again...\n")
 
     if not valid_output:
         print("Failed to process and deploy code successfully after maximum retries.")

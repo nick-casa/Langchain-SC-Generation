@@ -13,6 +13,13 @@ def get_solidity_version(code: str) -> str:
 
 def set_solc_version(version: str) -> bool:
     try:
+        version = version.replace("^", "")
+        subprocess.run(
+            ["solc-select", "install", version],
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
         subprocess.run(
             ["solc-select", "use", version],
             check=True,
@@ -20,8 +27,9 @@ def set_solc_version(version: str) -> bool:
             stderr=subprocess.PIPE,
         )
         return True
-    except subprocess.CalledProcessError:
-        return False
+    except subprocess.CalledProcessError as e:
+        error_message = e.stderr.decode("utf-8").strip()
+        return error_message
 
 
 def run_static_analyses(contract_path: str, temp_dir: str) -> List[str]:
@@ -36,7 +44,6 @@ def run_static_analyses(contract_path: str, temp_dir: str) -> List[str]:
         )
 
         if result.returncode != 0:
-            print(f"\033[38;5;208mSlither Failed to Execute: {result.stderr}\033[0m")
             return [f"Slither failed to execute: {result.stderr}"]
 
         with open(slither_output_path, "r") as file:
@@ -47,7 +54,6 @@ def run_static_analyses(contract_path: str, temp_dir: str) -> List[str]:
             errors.append(issue_description)
 
     except Exception as e:
-        print(f"\033[38;5;208mError running static analysis: {str(e)}\033[0m")
         errors.append(f"Error running static analysis: {str(e)}")
 
     return errors
@@ -66,11 +72,13 @@ def check_code(
             "errors": ["No Solidity version specified in the pragma statement."],
         }
 
-    if not set_solc_version(solidity_version):
+    version_set = set_solc_version(solidity_version)
+    if version_set is not True:
         return {
             "status": "Failure",
             "errors": [
-                f"Failed to set Solidity version to {solidity_version}. Ensure it is installed and try again."
+                f"Failed to set Solidity version to {solidity_version}. Ensure it is installed and try again.",
+                version_set,
             ],
         }
 
@@ -127,16 +135,24 @@ def check_code(
                 errors.extend(analysis_errors)
 
         except subprocess.CalledProcessError as e:
-            print(f"\033[38;5;208mCompilation process failed: {e.stderr}\033[0m")
             errors.append(f"Compilation process failed: {e.stderr}")
 
+    if errors:
+        status = "Failure"
+        print(
+            f"\033[38;5;208m************** Compilation process failed with the following errors ************** \033[0m"
+        )
+        print(f"\033[38;5;208m****** {errors} ****** \033[0m")
+    else:
+        status = "Success"
+        print(
+            f"\033[38;5;208m************** Compilation process succeeded! **************\033[0m"
+        )
+
     result = {
-        "status": "Failure" if errors else "Success",
+        "status": status,
         "errors": errors,
     }
-
-    if not errors:
-        print(f"\033[38;5;208mCompilation process succeeded!\033[0m")
 
     if abi:
         result["abi"] = abi
