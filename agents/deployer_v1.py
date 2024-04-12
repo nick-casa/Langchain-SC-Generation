@@ -111,9 +111,13 @@ def deploy_contract(code: str) -> Dict[str, str]:
             "Connection error. Make sure Ganache is running on port 8545. You can start Ganache using this command in terminal: ganache-cli"
         )
     except Exception as e:
-        print(type(e))
+        # print(type(e))
         errors.append(str(e))
 
+    if errors:
+        print(
+            f"\033[38;5;196m************** Deployer Found Errors. Errors Sent to LLM **************\033[0m"
+        )
     result = {
         "status": "Failure" if errors else "Success",
         "errors": errors,
