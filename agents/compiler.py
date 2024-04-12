@@ -26,6 +26,8 @@ def set_solc_version(version: str) -> bool:
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
+
+        # print("Solidity version installed and set successfully.")
         return True
     except subprocess.CalledProcessError as e:
         error_message = e.stderr.decode("utf-8").strip()
@@ -130,9 +132,9 @@ def check_code(
                     if "abi" in contract_data:
                         abi[contract_name] = contract_data["abi"]
 
-            if not errors or all("warning" in e for e in errors):
-                analysis_errors = run_static_analyses(contract_path, temp_dir)
-                errors.extend(analysis_errors)
+            # if not errors or all("warning" in e for e in errors):
+            #    analysis_errors = run_static_analyses(contract_path, temp_dir)
+            #    errors.extend(analysis_errors)
 
         except subprocess.CalledProcessError as e:
             errors.append(f"Compilation process failed: {e.stderr}")

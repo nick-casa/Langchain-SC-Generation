@@ -2,7 +2,8 @@ from typing import Dict, List, Union
 import json
 from web3 import Web3, HTTPProvider
 from solcx import compile_standard, install_solc
-import compiler as c
+
+from .compiler import get_solidity_version, set_solc_version
 
 # deployer.py
 import os
@@ -14,22 +15,24 @@ import tempfile
 def deploy_contract(code: str) -> Dict[str, str]:
     errors: List[str] = []
 
-    version = c.get_solidity_version(contract_source)
-    print("Solidity version:", version)
-    c.set_solc_version(version)
+    version = get_solidity_version(code)
+    version = version.replace("^", "")
+
+    install_solc(version)
+    set_solc_version(version)
 
     # Compile the Solidity contract
     compiled_sol = compile_standard(
         {
             "language": "Solidity",
-            "sources": {"Contract.sol": {"content": contract_source}},
+            "sources": {"Contract.sol": {"content": code}},
             "settings": {
                 "outputSelection": {
                     "*": {"*": ["abi", "metadata", "evm.bytecode", "evm.sourceMap"]}
                 }
             },
         },
-        solc_version=version[1:],
+        solc_version=version,
     )
 
     # Get the contract interface
@@ -41,8 +44,9 @@ def deploy_contract(code: str) -> Dict[str, str]:
     bytecode = contract_interface["evm"]["bytecode"]["object"]
     abi = contract_interface["abi"]
 
-    print("bytecode:", bytecode)
-    print("abi:", abi)
+    print(
+        f"\033[38;5;196m************** Deployement preparation process succeeded! **************\033[0m"
+    )
 
     try:
         # Connect to Ganache
@@ -96,7 +100,9 @@ def deploy_contract(code: str) -> Dict[str, str]:
         # Get the contract address
         contract_address = tx_receipt.contractAddress
 
-        print(f"Contract deployed at address: {contract_address}")
+        print(
+            f"\033[38;5;196m************** Contract deployed at address: {contract_address} **************\033[0m"
+        )
 
         # Return the deployed contract instance
         deployed_contract = w3.eth.contract(address=contract_address, abi=abi)

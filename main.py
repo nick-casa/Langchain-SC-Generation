@@ -7,7 +7,7 @@ from agents import (
     SmartContractGenerator,
     # select_optimal_code,
     check_code,
-    deploy_code,
+    deploy_contract,
     # test_deployed_contract,
 )
 
@@ -38,7 +38,9 @@ def main() -> None:
     code generation, merging, checking, and deployment.
     Accepts a prompt via a command-line argument via -p or --prompt flag.
     """
-    generator = SmartContractGenerator(azure_config=None)
+    generator = SmartContractGenerator(
+        azure_config=None, model_name="gpt-3.5-turbo", temperature=0.6
+    )
     args = parse_arguments()
     prompt = args.prompt
     valid_output = False
@@ -49,7 +51,10 @@ def main() -> None:
 
     while not valid_output and attempt_count < max_retries:
         attempt_count += 1
-        processed_query = process_query(prompt)
+
+        processed_query = process_query(
+            prompt, prompt_file="../prompts/sc-generation-2.txt"
+        )
         # This function generates multiple versions of code
         # generated_codes = generate_code_versions(processed_query)
         # For now, let's confine this to only one
@@ -59,20 +64,24 @@ def main() -> None:
             )
         else:
             generated_code = generator.generate_initial_code_version(processed_query)
+
         # Accordingly, we won't need this for now
         # optimal_code = select_optimal_code(generated_codes)
         # Check that the generated code can compile
         check_results = check_code(generated_code)
         # Add check results to feedback
+
         feedback["check_results"] = check_results
 
         if check_results["status"] == "Success":
-            deploy_results = deploy_code(generated_code)
+            deploy_results = deploy_contract(generated_code)
             # Add deployment results to feedback
+            print(deploy_results)
             feedback["deploy_results"] = deploy_results
 
             if deploy_results["status"] == "Success":
                 valid_output = True
+
                 # test_results = test_deployed_contract(
                 #    deploy_results["contract_address"]
                 # )

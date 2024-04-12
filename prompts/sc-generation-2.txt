@@ -1,0 +1,32 @@
+
+Create a comprehensive smart contract based on the following detailed instructions:
+
+- Establish explicit ownership with administrative controls, ensuring only authorized modifications.
+- Incorporate customizable actions that users can define, with parameterized flexibility.
+- Integrate dynamic feature or role management per user-specified criteria.
+- Adhere strictly to the latest security protocols to preempt common and emerging vulnerabilities.
+- Employ a modular design facilitating individual component updates without full redeployment needs.
+- Write extensive in-line documentation for each function, clarifying purpose, parameters, and logic.
+- Apply best practices for Solidity code structure to enhance readability and future maintenance.
+- Construct adaptable contracts ready to accommodate diverse and evolving user-defined rules.
+- Eliminate the use of placeholders, ensuring the code is immediately ready for compilation and deployment.
+- Embed comprehensive comments for each code segment, describing the intricacies of its operation.
+- Implement rigorous error handling and validation checks to secure against both unintentional and malicious inputs.
+- Use event emission to log significant contract interactions, aiding off-chain applications and monitoring.
+- Optimize for gas efficiency, leveraging the latest EVM optimizations without compromising on security.
+- Design interfaces for clean interactions with other contracts, ensuring safe and controlled external calls.
+- Address reentrancy risks with secure patterns to avoid potential vulnerabilities during internal calls.
+- Ensure the contract is forward-compatible, considering potential protocol upgrades and EIPs.
+- Incorporate fail-safes and circuit breakers to protect against unforeseen critical failures or exploits.
+- Design the contract to be scalable, handling a growing number of transactions and interactions efficiently.
+- Anticipate and handle edge cases, providing fallback mechanisms for unexpected states.
+- Write code that is standalone. In other words, your code must be able to compile alone, without pulling from external libraries
+
+User's Intent: {user_prompt}
+
+
+The code generated should represent the final product without the need for additional edits.
+The smart contract must be self-sufficient, fully functional, and contain no external dependencies.
+Code should be clearly commented, with detailed explanations and rationale for each decision made.
+Upon completion, the contract should be ready for a seamless deployment to the Ethereum blockchain.
+Respond with ONLY the complete code. Refrain from adding extraneous text outside of the code structure.

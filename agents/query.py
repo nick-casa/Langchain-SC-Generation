@@ -1,7 +1,9 @@
 import os
 
 
-def process_query(input_query: str) -> str:
+def process_query(
+    input_query: str, prompt_file: str = "../prompts/sc-generation.txt"
+) -> str:
     """
     Takes a user input query and processes it into a format suitable for code generation.
 
@@ -10,9 +12,7 @@ def process_query(input_query: str) -> str:
     """
     # Import prompt from ../promtps/sc-generation.txt
     with open(
-        os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "../prompts/sc-generation.txt")
-        ),
+        os.path.abspath(os.path.join(os.path.dirname(__file__), prompt_file)),
         "r",
     ) as file:
         prompt = file.read()

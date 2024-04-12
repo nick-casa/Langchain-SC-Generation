@@ -41,6 +41,35 @@ class SmartContractGenerator:
             f"\033[94m************** LLM Smart Contract Generator Successfully Initialized ************** \033[0m"
         )
 
+    def difference(self, str1: str, str2: str):
+        # Split both strings into list items
+        str1 = str1.split()
+        str2 = str2.split()
+
+        A = set(str1)  # Store all string1 list items in set A
+        B = set(str2)  # Store all string2 list items in set B
+
+        str_diff = A.symmetric_difference(B)
+        isEmpty = len(str_diff) == 0
+
+        if isEmpty:
+            return None
+        else:
+            return str_diff
+
+    def clean_code(self, code: str) -> str:
+        """
+        Cleans the generated code by removing any unnecessary characters.
+
+        Args:
+            code (str): The generated code to be cleaned.
+
+        Returns:
+            str: The cleaned code.
+        """
+        code = code.replace("```solidity", "").replace("```", "")
+        return code
+
     def generate_initial_code_version(self, processed_prompt: str) -> str:
         """
         Generates the initial version of code based on the given processed query.
@@ -59,9 +88,13 @@ class SmartContractGenerator:
             f"\033[94m************** Generating Smart Contract With LLM **************"
         )
         response = self.llm(messages).content
-        pprint.pprint(response)
+        code = self.clean_code(response)
+        pprint.pprint(code)
+
+        # pprint.pprint(processed_prompt)
+        # print()
         print("\033[0m")
-        return response
+        return code
 
     def generate_code_version_with_feedback(
         self,
@@ -128,9 +161,12 @@ class SmartContractGenerator:
             f"\033[94m************** Generating Smart Contract (With Feedback) With LLM **************"
         )
         response = self.llm(messages).content
-        pprint.pprint(response)
+        code = self.clean_code(response)
+        # pprint.pprint(processed_prompt)
+        print("*** Changes Made By LLM ***")
+        pprint.pprint(self.difference(output_code, code))
         print("\033[0m")
-        return response
+        return code
 
 
 if __name__ == "__main__":

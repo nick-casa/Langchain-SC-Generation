@@ -1,7 +1,0 @@
-langchain
-langchain-core
-langchain-openai
-slither-analyzer
-py-solc-x
-python-dotenv
-solc-select
