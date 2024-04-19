@@ -94,9 +94,7 @@ def main() -> None:
         # print(check_results)
         # print(deploy_results)
         # print("Operation failed, attempting again...\n")
-
-    if not valid_output:
-        print("Failed to process and deploy code successfully after maximum retries.")
+    return valid_output
 
 
 if __name__ == "__main__":

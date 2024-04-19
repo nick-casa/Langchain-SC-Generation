@@ -62,6 +62,7 @@ def process_code():
 
     return jsonify(
         {
+            "valid_code": valid_output,
             "generated_code": generated_code,
             "check_results": check_results,
             "deploy_results": deploy_results,
