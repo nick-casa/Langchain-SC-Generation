@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import subprocess
 import os
+import time
 from dotenv import load_dotenv
 from agents import process_query, SmartContractGenerator, check_code, deploy_contract
 
@@ -38,8 +39,10 @@ def process_code():
     generated_code, check_results, deploy_results = None, None, None
     max_retries = 5
     attempt_count = 0
+    total_time = 0
     feedback = {}
 
+    time_start = time.time()
     while not valid_output and attempt_count < max_retries:
         attempt_count += 1
         processed_query = process_query(
@@ -57,8 +60,8 @@ def process_code():
             if deploy_results["status"] == "Success":
                 valid_output = True
 
-    if not valid_output:
-        return jsonify({"error": "Failed to deploy code successfully"}), 500
+        if not valid_output:
+            return jsonify({"error": "Failed to deploy code successfully"}), 500
 
     return jsonify(
         {
@@ -66,6 +69,8 @@ def process_code():
             "generated_code": generated_code,
             "check_results": check_results,
             "deploy_results": deploy_results,
+            "attempts": attempt_count,
+            "total_time": time.time() - time_start,
         }
     )
 
