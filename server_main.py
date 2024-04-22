@@ -3,7 +3,13 @@ import subprocess
 import os
 import time
 from dotenv import load_dotenv
-from agents import process_query, SmartContractGenerator, check_code, deploy_contract
+from agents import (
+    process_query,
+    SmartContractGenerator,
+    check_code,
+    deploy_contract,
+    test_deployed_contract,
+)
 
 app = Flask(__name__)
 # Start Ganache CLI as a subprocess
@@ -58,17 +64,23 @@ def process_code():
             feedback["deploy_results"] = deploy_results
 
             if deploy_results["status"] == "Success":
-                valid_output = True
+                test_results = test_deployed_contract(
+                    deploy_results["contract_address"], generated_code
+                )
+                feedback["test_results"] = test_results
 
-        if not valid_output:
-            return jsonify({"error": "Failed to deploy code successfully"}), 500
+                if test_results["status"] == "Success":
+                    valid_output = True
 
+    if not valid_output:
+        return jsonify({"error": "Failed to deploy code successfully"}), 500
     return jsonify(
         {
             "valid_code": valid_output,
             "generated_code": generated_code,
             "check_results": check_results,
             "deploy_results": deploy_results,
+            "test_results": test_results,
             "attempts": attempt_count,
             "total_time": time.time() - time_start,
         }

@@ -119,11 +119,14 @@ def deploy_contract(code: str) -> Dict[str, str]:
             f"\033[38;5;196m************** Deployer Found Errors. Errors Sent to LLM **************\033[0m"
         )
         print(errors)
+
     result = {
         "status": "Failure" if errors else "Success",
         "errors": errors,
     }
-    result["contract_address"] = contract_address
+
+    if tx_receipt.contractAddress:
+        result["contract_address"] = contract_address
 
     return result
 
