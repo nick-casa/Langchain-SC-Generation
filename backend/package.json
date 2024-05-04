@@ -1,0 +1,14 @@
+{
+	"name": "sc-generation-backend",
+	"version": "1.0.0",
+	"description": "My app description",
+	"engines": {
+		"node": "14.x"
+	},
+	"dependencies": {
+		"ganache-cli": "^6.12.2"
+	},
+	"scripts": {
+		"start": "echo 'Node packages are installed!'"
+	}
+}
