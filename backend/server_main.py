@@ -63,7 +63,8 @@ def process_code():
             deploy_results = deploy_contract(generated_code)
             feedback["deploy_results"] = deploy_results
 
-            # if deploy_results["status"] == "Success":
+            if deploy_results["status"] == "Success":
+                valid_output = True
             #     test_results = test_deployed_contract(
             #         deploy_results["contract_address"], generated_code
             #     )
