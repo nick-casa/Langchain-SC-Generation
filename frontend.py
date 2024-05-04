@@ -35,6 +35,6 @@ if __name__ == "__main__":
     # below arrangment is done specially for Heroku
     # https://stackoverflow.com/questions/17260338/deploying-flask-with-heroku
     # Bind to PORT if defined, otherwise default to 5000.
-    # port = int(os.environ.get("PORT", 5000))
-    # app.run(port=port, debug=True)
-    app.run()
+    port = int(os.environ.get("PORT", 5000))
+    print(port)
+    app.run(port=port, debug=True)
