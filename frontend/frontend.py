@@ -2,7 +2,6 @@ from flask import Flask, render_template, request
 import requests  # Import the requests library
 import os
 
-
 app = Flask(__name__)
 
 
@@ -14,7 +13,7 @@ def home():
             return render_template("home.html", error="Prompt is required.")
 
         # Prepare the URL to call the backend API
-        backend_url = "http://127.0.0.1:5000/process"
+        backend_url = "https://sc-gen-backend-6650784bc8d3.herokuapp.com//process"
 
         # Make a POST request to the backend
         try:
