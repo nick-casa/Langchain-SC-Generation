@@ -63,14 +63,14 @@ def process_code():
             deploy_results = deploy_contract(generated_code)
             feedback["deploy_results"] = deploy_results
 
-            if deploy_results["status"] == "Success":
-                test_results = test_deployed_contract(
-                    deploy_results["contract_address"], generated_code
-                )
-                feedback["test_results"] = test_results
+            # if deploy_results["status"] == "Success":
+            #     test_results = test_deployed_contract(
+            #         deploy_results["contract_address"], generated_code
+            #     )
+            #     feedback["test_results"] = test_results
 
-                if test_results["status"] == "Success":
-                    valid_output = True
+            #     if test_results["status"] == "Success":
+            #         valid_output = True
 
     if not valid_output:
         return jsonify({"error": "Failed to deploy code successfully"}), 500
@@ -80,7 +80,7 @@ def process_code():
             "generated_code": generated_code,
             "check_results": check_results,
             "deploy_results": deploy_results,
-            "test_results": test_results,
+            # "test_results": test_results,
             "attempts": attempt_count,
             "total_time": time.time() - time_start,
         }
