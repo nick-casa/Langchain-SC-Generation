@@ -1,6 +1,5 @@
 from flask import Flask, render_template, request
 import requests  # Import the requests library
-import os
 
 app = Flask(__name__)
 
@@ -29,12 +28,3 @@ def home():
             return render_template("home.html", error=str(e))
 
     return render_template("home.html")
-
-
-if __name__ == "__main__":
-    # below arrangment is done specially for Heroku
-    # https://stackoverflow.com/questions/17260338/deploying-flask-with-heroku
-    # Bind to PORT if defined, otherwise default to 5000.
-    port = int(os.environ.get("PORT", 5000))
-    print(port)
-    app.run(port=port, debug=True)
