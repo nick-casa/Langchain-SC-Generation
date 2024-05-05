@@ -72,6 +72,7 @@
     </style>
 </head>
 <body>
+    <div id="spinner" class="spinner hidden"></div>
     <h1>Smart Contract Code Generator</h1>
     {% if error %}
     <p class="error">{{ error }}</p>
@@ -98,5 +99,16 @@
     <h2>Deployment Results:</h2>
     <pre>{{ result.deploy_results }}</pre>
     {% endif %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form');
+            const spinner = document.getElementById('spinner');
+
+            form.onsubmit = function() {
+                spinner.classList.remove('hidden');  // Show the spinner
+                form.querySelector('button').disabled = true;  // Optional: disable the button to prevent multiple submissions
+            };
+        });
+    </script>
 </body>
 </html>
